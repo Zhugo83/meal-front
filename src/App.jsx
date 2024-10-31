@@ -7,7 +7,7 @@ import Modal from '../component/Modal';
 function App() {
   const [showModal, setShowModal] = useState(false);
   const [id_cell, setIdCell] = useState(0);
-  const [date, setDate] = useState("");
+  const [currentDateNum, setCurrentDateNum] = useState(1);
 
   const openModal = (id_cell) => {
     return () => {
@@ -18,17 +18,18 @@ function App() {
 
   const closeModal = () => setShowModal(false);
 
-  // let stuff = {1 : "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "",
-  //              8: "", 9: "", 10: "", 11: "", 12: "", 13: "", 14: "",
-  //              15: "", 16: "", 17: "", 18: "", 19: "", 20: "", 21: ""}
+  const getWeekMonday = (num=currentDateNum) => {
+    let current_date = new Date();
+    current_date.setDate(current_date.getDate() - current_date.getDay() + num);
+    return current_date.toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit", year: "numeric"})
+  }
 
-  // let localstorage = {
-  //   date: {stuff},
-  // }
-  
-    
   const loadTextValue = (id_cell) => {
-    let text = localStorage.getItem(id_cell) || "";
+    if (JSON.parse(localStorage.getItem(getWeekMonday())) == null) {
+      return "";
+    }
+    
+    let text = JSON.parse(localStorage.getItem(getWeekMonday()))[id_cell];
     return text;
   };
 
@@ -36,22 +37,36 @@ function App() {
     return <td onClick={openModal(id_cell)}>{loadTextValue(id_cell)}</td>
   }
 
-  const getWeekMonday = (num=1) => {
-    let current_date = new Date();
-    current_date.setDate(current_date.getDate() - current_date.getDay() + num);
-    return current_date.toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit", year: "numeric"})
+  function displayallStorage() {
+    var archive = [],
+        keys = Object.keys(localStorage),
+        i = 0, key;
+
+    for (; key = keys[i]; i++) {
+        archive.push( <li>{key}</li> );
+    }
+
+    return archive;
+}
+
+  const dateNextChange = (e) => {
+    setCurrentDateNum(currentDateNum + 7);
+    loadTextValue(id_cell);
   }
 
-  console.log(getWeekMonday())
+  const datePrevChange = (e) => {
+    setCurrentDateNum(currentDateNum - 7);
+    loadTextValue(id_cell);
+  }
 
   return (
     <div className="App">
 
-    <Modal show={showModal} onClose={closeModal} id_cell={id_cell} user_text={loadTextValue(id_cell)} />
+    <Modal show={showModal} onClose={closeModal} id_cell={id_cell} user_text={loadTextValue(id_cell)} date={getWeekMonday()} />
       <div id="div_date">
-        <button>◀</button>
-        <h1> {getWeekMonday()} | {getWeekMonday(8)} </h1>
-        <button>▶</button>
+        <button onClick={datePrevChange}>◀</button>
+        <h1> {getWeekMonday()} | {getWeekMonday(currentDateNum + 7)} </h1>
+        <button onClick={dateNextChange}>▶</button>
       </div>
       <table>
         <thead>
@@ -99,6 +114,12 @@ function App() {
           </tr>
         </tbody>
       </table>
+      <div>
+        <p>List of weeks</p>
+        <ul>
+          <li>{displayallStorage()}</li>
+        </ul>
+      </div>
     </div>
   );
 }

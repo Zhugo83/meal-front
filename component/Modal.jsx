@@ -3,7 +3,7 @@ import React from 'react';
 import { useState } from 'react';
 import '../css/Modal.css';
 
-const Modal = ({ show, onClose, id_cell, user_text }) => {
+const Modal = ({ show, onClose, id_cell, user_text, date }) => {
   if (!show) return null;
 
   const [currentText, setCurrentText] = useState(user_text);
@@ -15,23 +15,24 @@ const Modal = ({ show, onClose, id_cell, user_text }) => {
   
   const handleSubmit = (e) => {
     
-    localStorage.setItem(id_cell, currentText);
+    let cellId = JSON.parse(localStorage.getItem(date));
 
-    // let stuff = {1 : "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "",
-    //            8: "", 9: "", 10: "", 11: "", 12: "", 13: "", 14: "",
-    //            15: "", 16: "", 17: "", 18: "", 19: "", 20: "", 21: ""}
+    if (cellId == null) {
+     cellId = {}
+    }
+    for (let i = 1; i <= 21; i++) {
+      if (cellId[i] == null) {
+        cellId[i] = "";
+      }
+      if (i == id_cell) {
+        cellId[i] = currentText;
+      }
+    }
 
 
-    // let thing = {date: {stuff}}
-    // let convertthingtojson = JSON.stringify(thing);
-    // localStorage.setItem(id_cell, convertthingtojson);
+    let convertthingtojson = JSON.stringify(cellId);
+    localStorage.setItem(date, convertthingtojson);
     onClose();
-  }
-
-  const getWeekMonday = (num=1) => {
-    let current_date = new Date();
-    current_date.setDate(current_date.getDate() - current_date.getDay() + num);
-    return current_date.toLocaleDateString("fr-FR", {day: "2-digit", month: "2-digit", year: "numeric"})
   }
 
   return (
@@ -39,7 +40,7 @@ const Modal = ({ show, onClose, id_cell, user_text }) => {
       <div className="modal-content">
         <h2>Add Meal</h2>
         <textarea onChange={onText} value ={currentText} placeholder="Enter your text here..."></textarea>
-        <button onClick={handleSubmit} className="add-button">Add</button>
+        <button onClick={handleSubmit} className="add-button">Add/Modify</button>
         <button className="close-button" onClick={onClose}>Close</button>
       </div>
     </div>
